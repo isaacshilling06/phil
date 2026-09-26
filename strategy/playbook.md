@@ -4605,6 +4605,39 @@ gate; the hand table is the narrative index. An operator proposal to
 make `reconcile` units-aware and to extend its B-check beyond
 outside-view-veto is filed in journal/proposals.md (2026-09-23 pass).
 
+**2026-09-26 19:5xZ update (LIGHT tick, cloud; `core/counterfactual.py
+reconcile` found 3 settled outside-view-veto rows never entered as table
+rows — Yabloko no-seat backfill from 2026-09-20, plus the two MrBeast
+wk1 rows settling same-commit per the schedule.json carrier rule.)**
+
+| Row | est vs mkt | Side | Realizable edge | Result | CF P&L |
+|---|---|---|---|---|---|
+| Yabloko no Duma seat (`56ed434261a5`) | 0.10 / 0.235 | No | +0.110 | No | +1.33 |
+| MrBeast 60-70M wk1 (`92a9d80fc3c3`) | 0.59 / 0.3835 | Yes | +0.198 | No | -5.00 |
+| MrBeast 70-80M wk1 (`8adb0a184d87`) | 0.40 / 0.625 | No | +0.210 | Yes | -5.00 |
+
+Net this batch: **-$8.67** (1W/2L). Mechanical ledger after these rows
+(`core/counterfactual.py ledger --skip-reason outside-view-veto`): 175
+rows / 167 trades / 118 events / 71W-96L / +$77.41 / dBrier +0.0332 /
+held-out +$71.52 (was 172/164/115/70W-94L/+$86.08/+0.0316/+$80.20). Side
+split: no 123/115/53W-62L/+$38.21 (adds Yabloko win + MrBeast 70-80
+loss); yes 52/52/18W-34L/+$39.20 (adds MrBeast 60-70 loss). Check:
+38.21 + 39.20 = 77.41.
+
+Ruling: no boundary change. The MrBeast pair is the same countable-metric
+family as the GTA VI/Musk wins elsewhere in this table, but here BOTH
+snapshots were vetoed on an undated RYD cache read and BOTH would have
+lost — a reminder the family's positive record lives entirely in the
+dated-anchor rows, not the class as a whole (`core/counterfactual.py
+ledger` auto-tags 92a9d80fc3c3 `countable-metric` but leaves its sibling
+8adb0a184d87 untagged, since the sibling's note says "same evidence"
+instead of repeating the subclass keyword — write the subclass name on
+every sibling row, not just the first, or the automated tally undercounts
+the family). Yabloko: the SMD-eligibility read (127 non-disqualified
+district candidates) correctly kept the veto's presumption of "no data on
+which districts are close" rather than dismissing Yes as structurally
+impossible; small win, no boundary case.
+
 ## Outside-view-veto relaxation fork (pre-registered, DEEP-2026-09-08, per operator note 2026-09-07 ~20:50Z)
 
 The veto on judgment estimates with claimed edge > 0.10 stays. This fork
@@ -6665,6 +6698,20 @@ handful of alien rows is enough to flip a small-n cell's sign.
 **Reading rule until further notice.** When quoting the `mlb-spreads`
 forecast cell, note it contains one NCAAF row (`32f25ca85db8`). Do not
 hand-edit journals to "fix" it — journals are core-written, full stop.
+
+**Second failure shape, same root cause (2026-09-26): drift, not error.**
+The two MrBeast wk1 view-count markets (4641023, 4641024) were forecast
+5 times each over 2026-09-25/26 as the estimate got re-anchored, and the
+`category` field drifted `youtube-views` → `social-media-views` →
+`video-views` across the chain — three different cells for one market's
+signal, none obviously wrong on its own (all plausible labels for the
+same event), which is why it wasn't caught before recording the way the
+BYU/Colorado NCAAF row was. Net effect is the same as the immutability
+problem above: a small-n cell's count and brier_delta get diluted across
+splinter categories instead of accumulating in one. Rule: before
+recording a forecast that supersedes an earlier one on the same
+`market_id`, reuse that earlier forecast's `category` verbatim — do not
+re-derive it from the title each time.
 
 ## DEEP-2026-09-22: where the skill lives — the by-class ledger the next fortnight answers to
 
