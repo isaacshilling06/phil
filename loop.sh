@@ -141,11 +141,17 @@ PY
   fi
   echo "model: $MODEL ($MODEL_WHY)" >&2
 
-  PROMPT="$(cat CYCLE.md)"
+  PROMPT="Execute one Phil trading cycle now. Follow the procedure below exactly once, starting at step 0. Do not summarize it or ask what to do.
+
+This run is managed by loop.sh: do not push commits; loop.sh pushes after this session exits. Use the Write tool to append the cycle-log line because shell write commands are not allowed.
+
+$(cat CYCLE.md)"
   if [ "$REAL_MODE" -eq 1 ]; then
     if [ "$PEARL_UP" -eq 1 ] \
        && python3 core/real.py doctor 2>/dev/null | grep -q '"ready": true'; then
-      PROMPT="$(cat CYCLE.md REAL.md)"
+      PROMPT="$PROMPT
+
+    $(cat REAL.md)"
     else
       echo "WARNING: --real requested but Pearl Connect signer not ready — running paper-only cycle" >&2
     fi
@@ -233,5 +239,7 @@ PY
       || echo "WARNING: could not release the runner lease — it expires on its own" >&2
   fi
 
-  [ "$i" -lt "$CYCLES" ] && sleep $((SLEEP_MIN * 60))
+  if [ "$i" -lt "$CYCLES" ]; then
+    sleep $((SLEEP_MIN * 60))
+  fi
 done
