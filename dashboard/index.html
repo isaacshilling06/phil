@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eff3f1">
+  <title>Phil | Paper Trading Monitor</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #142521;
+      --muted: #687772;
+      --line: #d8e0dc;
+      --paper: #eff3f1;
+      --surface: #fbfcfb;
+      --green: #176b51;
+      --green-soft: #e0f1e9;
+      --blue: #365bd6;
+      --blue-soft: #e8edff;
+      --red: #b84b39;
+      --red-soft: #fae9e5;
+      --gold: #987323;
+      --gold-soft: #f5efdc;
+      --mono: "IBM Plex Mono", "Cascadia Code", Consolas, monospace;
+      --sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    button { font: inherit; }
+    .shell { max-width: 1540px; margin: 0 auto; padding: 22px 28px 40px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .mark { width: 34px; height: 34px; display: grid; place-items: center; background: var(--ink); color: #d6f080; border-radius: 7px; font-family: var(--mono); font-size: 13px; font-weight: 700; }
+    .brand-title { margin: 0; font-size: 17px; font-weight: 700; }
+    .brand-sub { margin-top: 3px; color: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .updated { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .refresh { border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--surface); padding: 8px 11px; cursor: pointer; }
+    .refresh:hover { border-color: var(--green); }
+    .masthead { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 25px 0 19px; }
+    .eyebrow { color: var(--green); font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 6px 0 0; font-size: 27px; line-height: 1.15; font-weight: 650; }
+    .run-state { display: flex; align-items: center; gap: 9px; color: var(--muted); font: 11px var(--mono); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #a5b0ac; }
+    .dot.live { background: #19a673; box-shadow: 0 0 0 4px #19a67320; }
+    .mode { border: 1px solid #b9d8ca; background: var(--green-soft); color: var(--green); border-radius: 4px; padding: 4px 7px; font-weight: 700; }
+    .banner { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 15px; border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: 5px; background: var(--surface); margin-bottom: 14px; }
+    .banner strong { font-size: 13px; }
+    .banner span { color: var(--muted); font-size: 12px; }
+    .banner .cycle-time { color: var(--ink); font: 11px var(--mono); white-space: nowrap; }
+    .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .metric { min-height: 105px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .metric-label { color: var(--muted); font: 10px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+    .metric-value { margin-top: 11px; font: 600 24px var(--mono); letter-spacing: 0; white-space: nowrap; }
+    .metric-note { margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(310px, .85fr); gap: 14px; align-items: start; }
+    .column { display: grid; gap: 14px; min-width: 0; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
+    .panel-title { margin: 0; font-size: 13px; font-weight: 700; }
+    .panel-meta { color: var(--muted); font: 10px var(--mono); }
+    .panel-body { padding: 14px 15px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+    th { padding: 8px 10px; color: var(--muted); background: #f4f7f5; font: 10px var(--mono); font-weight: 500; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 9px 10px; border-top: 1px solid #e8eeeb; vertical-align: top; }
+    td.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+    .question { min-width: 220px; max-width: 440px; font-weight: 550; line-height: 1.35; }
+    .subline { display: block; margin-top: 4px; color: var(--muted); font: 10px var(--mono); }
+    .status { display: inline-block; border-radius: 4px; padding: 3px 6px; font: 10px var(--mono); text-transform: uppercase; }
+    .status.open { background: var(--blue-soft); color: var(--blue); }
+    .status.won { background: var(--green-soft); color: var(--green); }
+    .status.lost { background: var(--red-soft); color: var(--red); }
+    .bars { display: grid; gap: 10px; }
+    .bar-row { display: grid; grid-template-columns: minmax(95px, 1fr) 2fr 64px; gap: 10px; align-items: center; font-size: 11px; }
+    .bar-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { position: relative; height: 8px; border-radius: 6px; background: #e8eeeb; }
+    .bar-fill { height: 100%; border-radius: inherit; background: var(--green); }
+    .bar-fill.bad { background: var(--red); }
+    .bar-number { text-align: right; font: 10px var(--mono); }
+    .bar-foot { margin-top: 3px; color: var(--muted); font: 10px var(--mono); }
+    .timeline { display: grid; }
+    .timeline-item { padding: 11px 0; border-bottom: 1px solid #e8eeeb; }
+    .timeline-item:last-child { border: 0; padding-bottom: 0; }
+    .timeline-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .timeline-title { font-size: 12px; font-weight: 650; line-height: 1.35; }
+    .timeline-date { color: var(--muted); font: 10px var(--mono); white-space: nowrap; }
+    .timeline-copy { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; white-space: pre-wrap; }
+    .cycle-list { display: grid; gap: 7px; }
+    .cycle-line { padding: 8px 9px; border-radius: 4px; background: #f3f6f4; color: #475650; font: 10px/1.5 var(--mono); overflow-wrap: anywhere; }
+    .empty { padding: 18px 10px; color: var(--muted); font-size: 12px; text-align: center; }
+    .error { display: none; margin: 12px 0; padding: 10px 12px; border: 1px solid #e6b7ae; border-radius: 5px; background: var(--red-soft); color: #7f3327; font-size: 12px; }
+    .footer { padding: 20px 2px 0; color: var(--muted); font: 10px var(--mono); }
+    @media (max-width: 1020px) { .metrics { grid-template-columns: repeat(3, 1fr); } .layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 620px) { .shell { padding: 14px 12px 28px; } .topbar { align-items: start; } .updated { display: none; } .masthead { align-items: start; flex-direction: column; gap: 12px; } h1 { font-size: 23px; } .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; } .metric { min-height: 94px; padding: 11px; } .metric-value { font-size: 19px; } .banner { align-items: start; flex-direction: column; } .bar-row { grid-template-columns: 100px 1fr 58px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">PH</div>
+        <div><p class="brand-title">Phil</p><div class="brand-sub">Paper trading monitor</div></div>
+      </div>
+      <div class="top-actions"><span id="updated" class="updated">Connecting...</span><button id="refresh" class="refresh" type="button">Refresh</button></div>
+    </header>
+    <section class="masthead">
+      <div><div class="eyebrow">Operations / Forecast quality</div><h1>Control room</h1></div>
+      <div class="run-state"><span id="loop-dot" class="dot"></span><span id="loop-state">Checking loop</span><span id="mode" class="mode">--</span></div>
+    </section>
+    <div id="error" class="error" role="alert"></div>
+    <section class="banner">
+      <div><strong id="cycle-heading">Waiting for cycle data</strong><br><span id="cycle-detail">Reading journal/cycles.log</span></div>
+      <span id="cycle-time" class="cycle-time">--</span>
+    </section>
+    <section class="metrics" aria-label="Trading performance">
+      <article class="metric"><div class="metric-label">Paper cash</div><div id="cash" class="metric-value">--</div><div class="metric-note">Latest cycle close</div></article>
+      <article class="metric"><div class="metric-label">Open positions</div><div id="open-count" class="metric-value">--</div><div id="open-stake" class="metric-note">Exposure --</div></article>
+      <article class="metric"><div class="metric-label">Settled P&amp;L</div><div id="pnl" class="metric-value">--</div><div id="settled-count" class="metric-note">-- settled</div></article>
+      <article class="metric"><div class="metric-label">Bet Brier delta</div><div id="brier" class="metric-value">--</div><div id="brier-note" class="metric-note">Negative beats entry price</div></article>
+      <article class="metric"><div class="metric-label">Forecasts settled</div><div id="forecast-count" class="metric-value">--</div><div id="forecast-brier" class="metric-note">Stake-free, mid baseline</div></article>
+    </section>
+    <section class="layout">
+      <div class="column">
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Open positions</h2><span id="open-meta" class="panel-meta"></span></header>
+          <div class="table-wrap"><table><thead><tr><th>Market</th><th>Side</th><th>Entry</th><th>Est.</th><th>Stake</th></tr></thead><tbody id="open-table"></tbody></table></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Recent settlements</h2><span id="settled-meta" class="panel-meta"></span></header>
+          <div class="table-wrap"><table><thead><tr><th>Market</th><th>Result</th><th>Category</th><th>P&amp;L</th></tr></thead><tbody id="settled-table"></tbody></table></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Calibration by category</h2><span class="panel-meta">Brier delta vs market at entry</span></header>
+          <div id="category-bars" class="panel-body bars"></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Recent cycle log</h2><span class="panel-meta">journal/cycles.log</span></header>
+          <div id="cycles" class="panel-body cycle-list"></div>
+        </section>
+      </div>
+      <aside class="column">
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Strategy changes</h2><span class="panel-meta">Git history · strategy/</span></header>
+          <div id="commits" class="panel-body timeline"></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Latest retrospectives</h2><span class="panel-meta">journal/retros/</span></header>
+          <div id="retros" class="panel-body timeline"></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Forecast stream</h2><span id="forecast-meta" class="panel-meta"></span></header>
+          <div class="table-wrap"><table><thead><tr><th>Forecast</th><th>Category</th><th>Estimate</th><th>Status</th></tr></thead><tbody id="forecast-table"></tbody></table></div>
+        </section>
+        <section class="panel">
+          <header class="panel-head"><h2 class="panel-title">Execution &amp; pacing</h2><span class="panel-meta">Read-only</span></header>
+          <div id="execution" class="panel-body timeline"></div>
+        </section>
+      </aside>
+    </section>
+    <footer class="footer">Read-only local view · auto-refreshes every 30 seconds · open-position MTM is not queried</footer>
+  </main>
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const money = (value) => value == null ? "--" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
+    const pct = (value) => value == null ? "--" : `${(value * 100).toFixed(1)}%`;
+    const signed = (value) => value == null ? "--" : `${value >= 0 ? "+" : ""}${value.toFixed(4)}`;
+    const safe = (value) => value == null || value === "" ? "--" : String(value);
+    const dateLabel = (value) => {
+      if (!value) return "";
+      const date = new Date(value.length === 10 ? Number(value) * 1000 : value);
+      return Number.isNaN(date.valueOf()) ? value : date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    };
+    const cell = (value, className = "") => {
+      const td = document.createElement("td");
+      td.textContent = safe(value);
+      if (className) td.className = className;
+      return td;
+    };
+    const questionCell = (question, detail) => {
+      const td = document.createElement("td");
+      td.className = "question";
+      td.textContent = safe(question);
+      if (detail) {
+        const sub = document.createElement("span");
+        sub.className = "subline";
+        sub.textContent = detail;
+        td.append(sub);
+      }
+      return td;
+    };
+    const statusCell = (status) => {
+      const td = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = `status ${status || ""}`;
+      badge.textContent = safe(status);
+      td.append(badge);
+      return td;
+    };
+    const setEmpty = (body, columns, text) => {
+      const row = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = columns;
+      td.className = "empty";
+      td.textContent = text;
+      row.append(td);
+      body.replaceChildren(row);
+    };
+    const setClassBySign = (element, value) => {
+      element.classList.toggle("positive", value != null && value < 0);
+      element.classList.toggle("negative", value != null && value > 0);
+    };
+
+    function renderTable(id, rows, columns, emptyText) {
+      const body = byId(id);
+      if (!rows?.length) return setEmpty(body, columns, emptyText);
+      const trList = rows.map((row) => {
+        const tr = document.createElement("tr");
+        if (id === "open-table") {
+          tr.append(questionCell(row.question, `${safe(row.id)} · ${safe(row.category)}`), cell(row.outcome), cell(pct(row.entry_price), "num"), cell(pct(row.est_prob), "num"), cell(money(row.stake_usd), "num"));
+        } else if (id === "settled-table") {
+          tr.append(questionCell(row.question, `${safe(row.id)} · ${dateLabel(row.settled_ts)}`), statusCell(row.status), cell(row.category), cell(money(row.pnl_usd), `num ${row.pnl_usd >= 0 ? "positive" : "negative"}`));
+        } else {
+          tr.append(questionCell(row.question, `${safe(row.id)} · ${dateLabel(row.ts)}`), cell(row.category), cell(pct(row.est_prob), "num"), statusCell(row.status));
+        }
+        return tr;
+      });
+      body.replaceChildren(...trList);
+    }
+
+    function renderBars(categories) {
+      const root = byId("category-bars");
+      const rows = Object.entries(categories || {}).sort((a, b) => (a[1].brier_delta || 0) - (b[1].brier_delta || 0));
+      if (!rows.length) {
+        root.innerHTML = '<div class="empty">Settled bets will populate category calibration.</div>';
+        return;
+      }
+      const scale = Math.max(.02, ...rows.map(([, stats]) => Math.abs(stats.brier_delta || 0)));
+      const nodes = rows.slice(0, 12).map(([name, stats]) => {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        const label = document.createElement("div");
+        label.className = "bar-name";
+        label.textContent = name;
+        label.title = name;
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        const fill = document.createElement("div");
+        fill.className = `bar-fill${stats.brier_delta > 0 ? " bad" : ""}`;
+        fill.style.width = `${Math.max(3, Math.abs(stats.brier_delta || 0) / scale * 100)}%`;
+        track.append(fill);
+        const value = document.createElement("div");
+        value.className = `bar-number ${stats.brier_delta < 0 ? "positive" : stats.brier_delta > 0 ? "negative" : ""}`;
+        value.textContent = `${signed(stats.brier_delta)} · n${stats.n}`;
+        row.append(label, track, value);
+        return row;
+      });
+      root.replaceChildren(...nodes);
+      const foot = document.createElement("div");
+      foot.className = "bar-foot";
+      foot.textContent = "Lower / negative delta means better Brier score than the market at entry.";
+      root.append(foot);
+    }
+
+    function timeline(containerId, items, titleFor, copyFor, dateFor) {
+      const root = byId(containerId);
+      if (!items?.length) {
+        root.innerHTML = '<div class="empty">No entries yet.</div>';
+        return;
+      }
+      root.replaceChildren(...items.map((item) => {
+        const wrap = document.createElement("div");
+        wrap.className = "timeline-item";
+        const top = document.createElement("div");
+        top.className = "timeline-top";
+        const title = document.createElement("div");
+        title.className = "timeline-title";
+        title.textContent = titleFor(item);
+        const date = document.createElement("div");
+        date.className = "timeline-date";
+        date.textContent = dateFor(item);
+        top.append(title, date);
+        wrap.append(top);
+        const copyText = copyFor(item);
+        if (copyText) {
+          const copy = document.createElement("div");
+          copy.className = "timeline-copy";
+          copy.textContent = copyText;
+          wrap.append(copy);
+        }
+        return wrap;
+      }));
+    }
+
+    function render(data) {
+      const loop = data.loop || {};
+      byId("loop-dot").classList.toggle("live", Boolean(loop.active));
+      byId("loop-state").textContent = loop.active ? `RUNNING · PID ${loop.pid}` : "STOPPED";
+      byId("mode").textContent = (loop.mode || "idle").toUpperCase();
+      byId("mode").style.color = loop.mode === "real" ? "var(--red)" : "";
+      byId("mode").style.background = loop.mode === "real" ? "var(--red-soft)" : "";
+      byId("updated").textContent = `Updated ${dateLabel(data.generated_at)}`;
+
+      const ledger = data.ledger || {};
+      const score = data.score || {};
+      const overall = score.overall || {};
+      const cycle = data.cycle || {};
+      byId("cash").textContent = money(cycle.cash_usd);
+      byId("open-count").textContent = safe(ledger.open ?? 0);
+      byId("open-stake").textContent = `${money(ledger.open_stake_usd)} at risk · not MTM`;
+      byId("pnl").textContent = money(ledger.pnl_usd ?? overall.pnl_usd ?? 0);
+      setClassBySign(byId("pnl"), ledger.pnl_usd ?? overall.pnl_usd ?? 0);
+      byId("settled-count").textContent = `${safe(ledger.settled ?? overall.n ?? 0)} settled · ${safe(ledger.wins ?? overall.wins ?? 0)} wins`;
+      byId("brier").textContent = signed(overall.brier_delta);
+      setClassBySign(byId("brier"), overall.brier_delta);
+      byId("brier-note").textContent = overall.brier_delta == null ? "No settled bet baseline yet" : overall.brier_delta < 0 ? "Beating market at entry" : "Behind market at entry";
+      const forecastSummary = data.forecasts?.summary || {};
+      const forecastOverall = forecastSummary.overall || {};
+      byId("forecast-count").textContent = safe(forecastOverall.n ?? 0);
+      byId("forecast-brier").textContent = forecastOverall.brier_delta == null ? `${safe(forecastSummary.open ?? 0)} open · no settled baseline` : `delta ${signed(forecastOverall.brier_delta)} · ${safe(forecastSummary.open ?? 0)} open`;
+
+      byId("cycle-heading").textContent = cycle.timestamp ? `Last cycle · cash ${money(cycle.cash_usd)}` : "No completed cycle recorded";
+      byId("cycle-detail").textContent = cycle.line || "Waiting for the first cycle log entry.";
+      byId("cycle-time").textContent = cycle.timestamp ? dateLabel(cycle.timestamp) : "--";
+      byId("open-meta").textContent = `${safe(ledger.open ?? 0)} open · ${money(ledger.open_stake_usd)}`;
+      byId("settled-meta").textContent = `${safe(ledger.settled ?? 0)} total settled · ${money(ledger.pnl_usd ?? 0)}`;
+      renderTable("open-table", data.open_positions, 5, "No open paper positions.");
+      renderTable("settled-table", data.recent_settled, 4, "No settled paper positions yet.");
+      renderTable("forecast-table", data.forecasts?.rows, 4, "No forecast rows yet.");
+      renderBars(score.by_category);
+      byId("forecast-meta").textContent = `${safe(forecastSummary.open ?? 0)} open · ${safe(forecastSummary.settled ?? forecastOverall.n ?? 0)} settled`;
+      byId("cycles").replaceChildren(...(data.cycles || []).map((line) => {
+        const node = document.createElement("div");
+        node.className = "cycle-line";
+        node.textContent = line;
+        return node;
+      }));
+      if (!(data.cycles || []).length) byId("cycles").innerHTML = '<div class="empty">No cycle entries yet.</div>';
+
+      timeline("commits", data.strategy_commits, (item) => `${item.hash} · ${item.subject}`, () => "", (item) => dateLabel(item.timestamp));
+      timeline("retros", data.retrospectives, (item) => item.name, (item) => item.excerpt, () => "");
+      const schedule = data.schedule || {};
+      const real = data.real_ledger || {};
+      timeline("execution", [
+        { title: `${loop.mode === "real" ? "Real" : "Paper"} loop`, copy: loop.command || "No live loop process", date: loop.active ? "ACTIVE" : "IDLE" },
+        { title: "Real ledger", copy: `${real.total || 0} records · ${real.open || 0} open · ${money(real.pnl_usd || 0)} realized`, date: "SEPARATE" },
+        { title: "Next full cycle", copy: schedule.reason || "No pacing reason recorded.", date: dateLabel(schedule.next_full_cycle_after) || "--" },
+      ], (item) => item.title, (item) => item.copy, (item) => item.date);
+      byId("error").style.display = data.score_error ? "block" : "none";
+      byId("error").textContent = data.score_error ? `Score report unavailable: ${data.score_error}` : "";
+    }
+
+    async function refresh() {
+      byId("refresh").disabled = true;
+      try {
+        const response = await fetch(`/api/snapshot?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Snapshot request failed (${response.status})`);
+        render(await response.json());
+      } catch (error) {
+        byId("error").style.display = "block";
+        byId("error").textContent = `Dashboard connection failed: ${error.message}`;
+      } finally {
+        byId("refresh").disabled = false;
+      }
+    }
+    byId("refresh").addEventListener("click", refresh);
+    refresh();
+    setInterval(refresh, 30000);
+  </script>
+</body>
+</html>
