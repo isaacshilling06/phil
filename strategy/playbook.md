@@ -5535,6 +5535,19 @@ model read as "api view: X" in the note. A 0.6-ish mid (last week's
 0.93-vs-0.63 win) is disagreement, not certainty — the rule does not
 touch it. n=1 event; recording discipline, category bar unchanged.
 
+**2026-09-28 18:2xZ retro (RETRO-20260928-1820): the bootstrap rule
+covers every post-count window, and there is no Gaussian fallback.** On
+the Musk Sep 26-28 3-day window, df31709e573d (65-89, own 0.33 vs mid 0.225)
+and 70714dd64207 (40-64, 0.64 vs 0.755) used a flat-pace Gaussian with a
+"reversion to his usual rate" shade. They never ran work/xtracker_boot.py.
+The count landed in 40-64, and the family scored +0.128 dBrier. A flat pace
+overstates the remaining count when that remainder holds more US night
+hours than the elapsed part did. Aligned bootstrap windows capture this.
+Rule: for any post-count window, est_prob = the bootstrap output. If the
+bootstrap was not run this cycle, record no forecast for the family
+(skip as benchmark-unreachable). Recording discipline only; category bar
+unchanged.
+
 ## Utterance-market base-rate gate (enacted DEEP-2026-09-12)
 
 A Yes-side BET on a say-the-word / trump-mention / vance-mention /
