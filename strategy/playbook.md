@@ -1490,7 +1490,17 @@ structurally unbettable by construction — the fact-finality gate vetoes
 rumor-based release-timing edges regardless of the estimate, and
 ai-model-release is also the forecast book's worst category (brier_delta
 +0.188 on n=11, albeit rumor-correlated). Calibration practice on these
-is worth ONE slot, not most of the cycle's budget. Rule: at most ONE
+is worth ONE slot, not most of the cycle's budget. **Date-rumor shrink
+rule (RETRO-20260928-2255):** when a leak source names the date and the
+book has already moved toward it, est_prob starts at the mid and moves at
+most 0.15 from it. Only a primary source (a lab post, docs or status page)
+lifts that limit. The self-model's P(day | week) read goes in the note as
+"model view: X". Evidence: all 5 Sonnet Sep28 rows (0.15-0.45 vs mids
+0.425-0.705) lost to the mid when the model shipped Monday on the
+TestingCatalog/Lyra leak. That is the same shape as the Opus, Mythos and
+Gemini Flash families, and the category sits at +0.0924 (n=37). This
+records my calibrated belief. It does not change bet eligibility.
+Rule: at most ONE
 research slot per FULL cycle goes to fact-finality-gated timeline-rumor
 candidates, and sibling markets on the same underlying event (by-date /
 exact-date ladders) share that single slot — a coherent family estimate
@@ -4701,6 +4711,46 @@ purpose — declining thin-precedent behavioral edges against a market that
 had stronger countable evidence (streams/chart weeks) than our narrative
 prior did.
 
+**2026-09-28 22:5xZ update (FULL cycle, operator; RETRO-20260928-2255,
+same commit as the settlement per the schedule.json carrier rule;
+`reconcile` section B listed exactly these 5 rows.)**
+
+| Row | est vs mkt | Side | Realizable edge | Result | CF P&L |
+|---|---|---|---|---|---|
+| 10y Treasury hit 5.20% Sep, first read (`fdedb184ad3e`) | 0.28 / 0.06 (No) | No | +0.190 | Yes | -5.00 |
+| 10y Treasury hit 5.20% Sep, re-read (`3ed526b57eca`) | 0.47 / 0.26 (No) | No | +0.200 | Yes | -5.00 |
+| Heart of the Beast OW 17-20m (`47b13697e8ff`) | 0.45 / 0.905 | No | +0.440 | No | +40.45 |
+| Sonnet on-Sep28 first read, fact-finality (`1391d8aacefb`) | 0.18 / 0.425 | No | +0.220 | Yes | -5.00 |
+| Sonnet on-Sep28 re-read, fact-finality (`aaa5f39b052a`) | 0.35 / 0.705 | No | +0.270 | Yes | -5.00 |
+
+Net this batch: **+$20.45** (1W/4L). Mechanical ledger after these rows
+(`core/counterfactual.py ledger --skip-reason outside-view-veto`): 182
+rows / 174 trades / 123 events / 72W-102L / +$87.87 / dBrier +0.0341 /
+held-out +$81.97 (was 177/169/120/71W-98L/+$67.41/+0.0334/+$56.51). Side
+split: no 130/122/54W-68L/+$48.67 (adds all five); yes 52/52/18W-34L/
++$39.20 (unchanged). Check: 48.67 + 39.20 = 87.87.
+
+Ruling: no boundary change. The four losses are the recurring "not by /
+not on that date" No-read against a market already pricing the event
+(Sonnet leak, September rates selloff); the veto saved $20. The one win
+is box-office: a Fri x IM read against a 0.905 book that priced the
+trade press's upper number as certain. Box-office veto rows now 14 rows /
+8 events / 7W-7L / +$18.85 / dBrier -0.0331. That is the best-calibrated
+veto category, but it has 8 events and the Resident Evil trio went the
+other way. The next deep retro checks it against the relaxation fork.
+
+Wide-spread-veto rows from the same settlement (per-row duty; narrative
+totals per the 2026-09-06 operator note):
+
+| Row | est vs mkt | Side | Realizable edge | Result | CF P&L |
+|---|---|---|---|---|---|
+| 30y Treasury hit 5.50% Sep (`99df204b7f85`) | 0.67 / 0.5395 | Yes | +0.055 | Yes | +3.13 |
+| 30y Treasury hit 5.55% Sep, rates-touch (`84012264b65d`) | 0.31 / 0.5085 | No | -0.107 | Yes | -5.00 |
+
+Mechanical wide-spread-veto line after these rows: 25 rows / 22 trades /
+12W-10L / -$26.91 / dBrier -0.0356 / held-out -$19.09. Side split: yes
+11/10/7W-3L/-$2.12, no 14/12/5W-7L/-$24.79. Check: -2.12 - 24.79 = -26.91.
+
 ## Outside-view-veto relaxation fork (pre-registered, DEEP-2026-09-08, per operator note 2026-09-07 ~20:50Z)
 
 The veto on judgment estimates with claimed edge > 0.10 stays. This fork
@@ -6594,6 +6644,14 @@ shaded-vs-raw tally they pre-asked for, one row per independent event:
 | Volynets–Birrell (`b5774501ec4c`) | single-book devig 0.636 | 0.68 | toward market consensus | worse (+0.058) |
 | SPY LOW $760 (`23a99c8fe4e8`) | touch.py 0.118 | 0.08 | **measured** ES overnight print | better (−0.0075) |
 | Bondar–Ruse (`8785a067de69`, added RETRO-20260926-0615) | single-book devig 0.591 | 0.60 | toward market consensus | worse (+0.011) |
+| 10y 5.20 Sep (`3ed526b57eca`, added RETRO-20260928-2255; shade NOT recorded) | driftless Gauss No 0.47 | shade view: raw-drift bootstrap No 0.35 | second mechanical read (drift kept) | shade view better (0.1225 vs 0.2209) |
+
+Treasury/resolver-series drift tally (RETRO-20260928-2255): driftless beat
+drift on 1 event (Dem Senate bands, Sep 25). Drift beat driftless on 1
+event (the September rates selloff: 30y 5.39/5.42/5.45/5.50/5.55 and 10y
+5.20 all hit). Keep recording driftless. Every Treasury ladder note must
+carry BOTH the driftless and raw-drift bootstrap numbers, so the next deep
+retro can count events per side.
 
 Unmeasured shades: 0 for 4 independent events (sign test p≈0.06
 one-sided, small n, but the direction has never flipped). Update
