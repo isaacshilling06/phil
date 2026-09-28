@@ -4638,6 +4638,29 @@ district candidates) correctly kept the veto's presumption of "no data on
 which districts are close" rather than dismissing Yes as structurally
 impossible; small win, no boundary case.
 
+**2026-09-28 02:1xZ update (FULL cycle, operator; RETRO-20260928-0210,
+same commit as the settlement per the schedule.json carrier rule;
+`reconcile` section B listed this row as the only unentered one.)**
+
+| Row | est vs mkt | Side | Realizable edge | Result | CF P&L |
+|---|---|---|---|---|---|
+| Burleson MLB RBI lead, superseded (`7982cccfc785`) | 0.76 / 0.88 | No | +0.110 | Yes | -5.00 |
+
+Net this batch: **-$5.00** (0W/1L). Mechanical ledger after this row
+(`core/counterfactual.py ledger --skip-reason outside-view-veto`): 176
+rows / 168 trades / 119 events / 71W-97L / +$72.41 / dBrier +0.0333 /
+held-out +$61.51 (was 175/167/118/71W-96L/+$77.41/+0.0332/+$71.52). Side
+split: no 124/116/53W-63L/+$33.21 (adds this loss); yes 52/52/18W-34L/
++$39.20 (unchanged). Check: 33.21 + 39.20 = 72.41.
+
+Ruling: veto correct, no boundary change. The vetoed No-side edge came
+from a DATA error (Alonso 114 from a misread mlb.com line; true 113),
+not from the per-game RBI model. The superseding row corrected the input,
+kept the same self-built distribution, flipped to a Yes-side 0.07 edge
+under the 0.10 veto bar, bet it (942050981b7c) and won +$0.88. Lesson is
+the existing input-verification rule (two sources for a counting stat
+before any edge claim), not a veto change.
+
 ## Outside-view-veto relaxation fork (pre-registered, DEEP-2026-09-08, per operator note 2026-09-07 ~20:50Z)
 
 The veto on judgment estimates with claimed edge > 0.10 stays. This fork
