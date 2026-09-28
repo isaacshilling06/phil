@@ -5678,6 +5678,10 @@ say-the-word bets are 0-for-4 lifetime (−$20, score.py), both
 post-gate losses root-caused to the whole-transcript counting bug the
 speaker-only method note has since fixed — the gate has not yet been
 tested with correct counts.
+Fresh-checkpoint tally: row 1/5 `48e57d1eb5aa` (Ravens-Cowboys
+"Roughing The Passer", in-play, est 0.30 vs ask 0.21, flag-rate base
+rate not transcripts) WON, costly block, CF +$18.81
+(RETRO-20260928-0905). Running: 0 correct / 1 costly, CF +$18.81.
 
 **First test with correct counts (RETRO-20260924-1729, Xi State Arrival
 Sep 24).** Speaker-only 0/4 base rates held on all three absent-word
