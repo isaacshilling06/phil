@@ -3098,6 +3098,23 @@ market on decision-weighted Brier. Ruling unchanged: forecast-only
 "indefinitely" stands until a deep retro re-grades against the full
 pre-registered bar, and a reach-only slice never re-opens it.
 
+**2026-09-28 04:4xZ checkpoint (LIGHT tick, operator; RETRO-20260928-0446;
+three same-week Sep21-27 rows settled, not yet folded into the formal
+tally above — dip/reach mix for the same BTC window makes the decision
+grouping a judgment call better left to a deep retro):** all three LOST
+(no touch), market closer on all three, own worse on all three (own not
+closer on any). `efa75442b3c7` BTC dip $80k: own 0.122 vs mid 0.075
+(CoinGecko 31d vol), dB +0.0093. `6f5b7cf4f742` ETH reach $2,900: own
+0.3244 vs mid 0.305 (CoinGecko 31d vol), dB +0.0122, gap only 1.9pp but
+above the "no weight" noise floor (cf. `fde4324641b4`'s 0.03% gap).
+`fd59af69853c` BTC reach $88k: own 0.41 vs mid 0.285 (Binance 30d vol),
+dB +0.0869 — the largest single-row miss recorded in this family; the
+paired mech read (superforcaster-market-aware-olas-predict-r1-14b, 0.30)
+was also closer to the market than the own estimate was. No ruling
+change (family is forecast-only indefinitely regardless); flagged so the
+next full tally recompute includes these three rather than silently
+skipping them.
+
 Excluded per the sub-boundary taxonomy (DEEP-2026-08-15): Zambia
 (fa185b55a5c3, edge 0.06) and Musk wk 200-219 (7808b6f5a4ef, edge 0.045)
 both settled this tick too, but both carry claimed edges ≤0.10 under a
@@ -4660,6 +4677,29 @@ kept the same self-built distribution, flipped to a Yes-side 0.07 edge
 under the 0.10 veto bar, bet it (942050981b7c) and won +$0.88. Lesson is
 the existing input-verification rule (two sources for a counting stat
 before any edge claim), not a veto change.
+
+**2026-09-28 04:4xZ update (LIGHT tick, operator; RETRO-20260928-0446,
+same commit as the settlement per the schedule.json carrier rule):**
+
+| Row | est vs mkt | Side | Realizable edge | Result | CF P&L |
+|---|---|---|---|---|---|
+| VMA Best Country, Choosin' Texas (`35112a0816ef`) | 0.75 / 0.936 | No | +0.182 | Yes | -5.00 |
+
+Net this batch: **-$5.00** (0W/1L). Mechanical ledger after this row
+(`core/counterfactual.py ledger --skip-reason outside-view-veto`): 177
+rows / 169 trades / 120 events / 71W-98L / +$67.41 / dBrier +0.0334 /
+held-out +$56.51 (was 176/168/119/71W-97L/+$72.41/+0.0333/+$61.51). Side
+split: no 125/117/53W-64L/+$28.21 (adds this loss); yes 52/52/18W-34L/
++$39.20 (unchanged). Check: 28.21 + 39.20 = 67.41.
+
+Ruling: veto correct, no boundary change. The declined No-side edge came
+from a self-built behavioral model resting on n=1 precedent (2025's
+inaugural VMA Best Country went to the smaller chart act over the bigger
+one); the market's 0.936 Yes reflected Langley's 18-week #1 run and
+70M+ views over a fan-voted field, and Yes won. Confirms the veto's
+purpose — declining thin-precedent behavioral edges against a market that
+had stronger countable evidence (streams/chart weeks) than our narrative
+prior did.
 
 ## Outside-view-veto relaxation fork (pre-registered, DEEP-2026-09-08, per operator note 2026-09-07 ~20:50Z)
 
