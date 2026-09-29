@@ -4984,6 +4984,17 @@ don't read the UR loss as validating tight ones, until more of this exact
 shape (sourced-sd self-model, standard floor, headline econ print)
 settles.
 
+*Shape tally (RETRO-20260929-1734):* 4 standard-floor rows, 3W/1L:
+NFP 0-50k No W (wrong reason), UR 4.1% No L (sd too wide), Canada GDP
+0.0-0.1 Yes W (empirical flash-error series, `strategy/tools/cagdp_flash.py`,
+ladder Brier 0.212 vs mkt 0.301), JOLTS 7.4-7.5 No W (bet leg 0.014 vs
+0.036, but whole-ladder 0.086 vs 0.082 because the market's thinner <7.0
+tail beat mine). JOLTS flag: FRED JTSJOL m/m sd (313k) is a random-walk
+dispersion, not a consensus-miss dispersion, and likely fattens tails. The
+next JOLTS ladder quotes a trailing consensus-miss sd next to it and states
+which one est_prob uses. Tail rows stay forecast-only as before. n is too
+small to change any sd input.
+
 **Pre-registered kill switch:** after 4 settled carve-out EVENTS or 6
 settled carve-out BETS (whichever comes first), if net realizable P&L
 ≤ 0 or the agent is not ahead on dBrier in a majority, the carve-out
