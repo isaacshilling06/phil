@@ -3540,3 +3540,54 @@ field is reliably sourced for this market family, or whether it
 creates any early-close / UMA-timing risk worth flagging before entry.
 Status: INFORMATIONAL, single instance, not investigated further
 (LIGHT tick, no research budget).
+
+## 2026-09-29 10:4xZ — LIGHT tick, PHIL_LEASE/PHIL_PUSH_BY_LOOP unreadable in this sandbox, and the release-timing consequence
+
+Step 0's `PHIL_LEASE` branch assumes the agent can read its own
+environment: `printenv`, `printenv PHIL_LEASE`, `test -v PHIL_LEASE`,
+`echo "$PHIL_LEASE"`, and `python3 -c "import os; os.environ..."` all
+returned "this command requires approval" or "Contains simple_expansion"
+in this session — every path to reading a pre-set env var is blocked,
+and there is no operator present in a headless loop.sh run to grant the
+approval. This is not a one-off: the four most recent cycle-log lines
+before this one (09-29 08:12Z, 09:01Z, 09:51Z, and this one) all hit the
+identical wall and independently converged on the same workaround —
+treat the unreadable var as absent and run `core/lease.py acquire`
+directly (the procedure's "otherwise" branch). That workaround is
+provably safe for *acquire*: `runner_id()` is deterministic
+("operator" whenever `PHIL_PUSH_BY_LOOP` is set, which this machine's
+loop.sh always sets), so re-running acquire mid-session just renews the
+same runner's own lease (`replaced: "operator"`, confirmed each time via
+`core/lease.py check` returning `mine: true` before the call).
+
+It is NOT obviously safe for *release*. All three prior lines
+(08:12Z, 09:01Z, 09:51Z) close with "lease released after commit since
+PHIL_LEASE was not preset this session" — but structural evidence says
+`PHIL_PUSH_BY_LOOP` (and therefore very likely `PHIL_LEASE`) genuinely
+IS set on every one of these runs: the Bash tool only allows
+`python3 core/*`, plus the exact narrow git-subcommand allowlist
+`loop.sh`'s `CMD` array grants, and nothing else — matching loop.sh's
+`--allowedTools` list line for line. If `PHIL_LEASE` is actually set to
+`"acquired"`, CYCLE.md step 9 says release is loop.sh's job, done in its
+own interactive shell strictly *after* its push — "release after the
+push, never before, so the other runner's next tip check sees your
+commit." An agent session that releases the lease itself before exiting
+releases it before loop.sh has pushed anything (PHIL_PUSH_BY_LOOP stops
+step 9 at the commit), opening exactly the window the lease exists to
+close: the cloud runner could see a free lease, acquire it, and start a
+FULL cycle against a stale `origin/main` that doesn't yet have this
+session's commit. This cycle (10:4xZ) did NOT release the lease for that
+reason, diverging from the last three logged lines on purpose — flagging
+here rather than silently repeating a possibly-unsafe pattern four times
+running. I did not attempt to fix the sandbox restriction itself (not my
+path; it's this session's tool permissioning, not `core/` or `strategy/`
+code) and did not touch `core/lease.py`.
+
+Ask: either loosen the Bash allowlist enough for a side-effect-free
+env-var read (e.g. explicitly allow `printenv PHIL_LEASE` and
+`printenv PHIL_PUSH_BY_LOOP`, nothing broader), or have `loop.sh` pass
+these two flags into the prompt text itself instead of the environment,
+since the prompt is trusted content the agent can already read. Either
+removes the ambiguity this cycle had to reason around by inference.
+Status: PROPOSED (operator), first instance escalated; recurred silently
+for at least 3 prior cycles before this one.
