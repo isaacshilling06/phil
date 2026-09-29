@@ -3524,3 +3524,19 @@ regexes, subclass auto-tagger.
 gate 1 fails, f4 dBrier +0.0363). 0 bets placed, 3 settled WON (+$4.43),
 4 open. No reverts; one consolidation rule (unmeasured shades) and a
 research-allocation re-rank capping social-media-postcount.
+
+## 2026-09-29 08:1xZ — LIGHT tick, market endDate earlier than its own release event
+
+Open position 5251801c9db5 (JOLTS Aug 7.4-7.5M bracket, recorded
+2026-09-26): `ledger.py status` shows the market's own `ends` field as
+2026-09-29T08:00:00Z, but the BLS JOLTS release this market resolves on
+is 2026-09-29T14:00:00Z — the market's nominal end date is ~6h earlier
+than the actual data event it settles on. score.py flags the position
+PAST END DATE hours before the number it depends on even exists.
+resolve.py reads official resolution rather than endDate, so this
+shouldn't itself break settlement, but if it recurs across other
+econ-calendar brackets it's worth checking whether gamma's endDate
+field is reliably sourced for this market family, or whether it
+creates any early-close / UMA-timing risk worth flagging before entry.
+Status: INFORMATIONAL, single instance, not investigated further
+(LIGHT tick, no research budget).
